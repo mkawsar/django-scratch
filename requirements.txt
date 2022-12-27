@@ -5,6 +5,7 @@ django-filter==22.1
 djangorestframework==3.14.0
 Markdown==3.4.1
 protobuf==4.21.12
+PyJWT==2.6.0
 pytz==2022.7
 six==1.16.0
 sqlparse==0.4.3
