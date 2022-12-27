@@ -2,7 +2,6 @@ from django.apps import apps
 from django.db import models
 from django.utils import timezone
 from helpers.models import TrackingModel
-from django.contrib.auth.hashers import make_password
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.contrib.auth.models import (AbstractBaseUser, PermissionsMixin, UserManager)
@@ -26,7 +25,7 @@ class MyUserManager(UserManager):
         )
         username = GlobalUserModel.normalize_username(username)
         user = self.model(username=username, email=email, **extra_fields)
-        user.password = make_password(password)
+        user.set_password(password)
         user.save(using=self._db)
         return user
 
@@ -55,13 +54,9 @@ class User(AbstractBaseUser, PermissionsMixin, TrackingModel):
         _("username"),
         max_length=150,
         unique=True,
-        help_text=_(
-            "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
-        ),
+        help_text=_("Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."),
         validators=[username_validator],
-        error_messages={
-            "unique": _("A user with that username already exists."),
-        },
+        error_messages={"unique": _("A user with that username already exists."), },
     )
     first_name = models.CharField(_("first name"), max_length=150, blank=True)
     last_name = models.CharField(_("last name"), max_length=150, blank=True)
@@ -81,7 +76,7 @@ class User(AbstractBaseUser, PermissionsMixin, TrackingModel):
     )
     date_joined = models.DateTimeField(_("date joined"), default=timezone.now)
     email_verified = models.BooleanField(
-        _("active"),
+        _("email_verified"),
         default=False,
         help_text=_("Designates whether this users email is verified."),
     )
@@ -89,8 +84,8 @@ class User(AbstractBaseUser, PermissionsMixin, TrackingModel):
     objects = MyUserManager()
 
     EMAIL_FIELD = "email"
-    USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = ["email"]
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username"]
 
     @property
     def token(self):
