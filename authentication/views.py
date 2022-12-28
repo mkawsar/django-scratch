@@ -35,7 +35,7 @@ class LoginAPIView(GenericAPIView):
 
 
 class AuthUserAPIView(GenericAPIView):
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated | permissions.IsAdminUser,)
 
     def get(self, request):
         user = request.user
