@@ -21,9 +21,9 @@ class JWTAuthentication(BaseAuthentication):
             user = User.objects.get(username=username)
             return (user, token)
         except jwt.ExpiredSignatureError as ex:
-            raise exceptions.AuthenticationFailed('Token is expired, login again')
+            raise exceptions.AuthenticationFailed({'data': 'Token is expired, login again', 'status': 403})
         except jwt.DecodeError as ex:
-            raise exceptions.AuthenticationFailed('Token is invalid,')
+            raise exceptions.AuthenticationFailed({'data': 'Token is invalid', 'status': 403})
         except User.DoesNotExist as no_user:
             raise exceptions.AuthenticationFailed('No such user')
         return super().authenticate(request)
