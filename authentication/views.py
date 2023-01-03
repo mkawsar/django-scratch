@@ -39,5 +39,6 @@ class AuthUserAPIView(GenericAPIView):
 
     def get(self, request):
         user = request.user
+        print(user.groups.filter(name='user').exists())
         serializer = AuthUserSerializers(user)
         return response.Response({'data': serializer.data, 'status': status.HTTP_200_OK})
