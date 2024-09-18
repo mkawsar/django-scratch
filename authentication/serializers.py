@@ -14,7 +14,8 @@ class RegisterSerializers(serializers.ModelSerializer):
 
 
 class LoginSerializers(serializers.ModelSerializer):
-    password = serializers.CharField(max_length=128, min_length=6, write_only=True)
+    email = serializers.EmailField(required=True)
+    password = serializers.CharField(write_only=True, required=True)
 
     class Meta:
         model = User
@@ -25,4 +26,4 @@ class LoginSerializers(serializers.ModelSerializer):
 class AuthUserSerializers(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'is_superuser', 'last_login')
