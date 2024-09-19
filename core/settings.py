@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'authentication',
     'django_extensions',
-    'django_filters'
+    'django_filters',
+    'tiktok'
 ]
 
 MIDDLEWARE = [
