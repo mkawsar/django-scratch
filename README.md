@@ -1,1 +1,1 @@
-# django-banking
+# django scratch
