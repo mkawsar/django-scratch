@@ -1,26 +1,50 @@
+from playwright.sync_api import sync_playwright
 import time
-from bs4 import BeautifulSoup
-from selenium import webdriver
 
-# Set up the Selenium Chrome driver
-def setup_selenium():
-    options = webdriver.ChromeOptions()
-    options.add_argument('--headless')  # Run browser in headless mode
-    options.add_argument('--disable-gpu')
-    driver = webdriver.Chrome(options=options)
-    return driver
+def scrape_tiktok_videos(username):
+    with sync_playwright() as p:
+        # Launch browser in non-headless mode to avoid bot detection
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
 
-# Scrape TikTok data for a given username
-def scrape_tiktok_profile(username):
-    driver = setup_selenium()
+        # Set a user agent to avoid bot detection
+        # page.set_user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+        
+        # Navigate to the TikTok user's page
+        page.goto(f'https://www.tiktok.com/@{username}')
+        
+        # Wait for the page to finish loading
+        page.wait_for_load_state('networkidle')
 
-    # Navigate to the TikTok user's profile page
-    driver.get(f'https://www.tiktok.com/@{username}')
-    time.sleep(5)  # Wait for page to fully load
+        # Wait for the post item list to appear, with increased timeout
+        try:
+            page.wait_for_selector("div[data-e2e='user-post-item-list']", timeout=30000)
+        except Exception as e:
+            print(f"Error: {e}")
+            browser.close()
+            return []
 
-    # Get the page source and parse it with BeautifulSoup
-    soup = BeautifulSoup(driver.page_source, 'html.parser')
-    videos = soup.find_all('div', {'class': 'eq741c50'})
-    for video in videos:
-        video_url = video.find('a', {'class': 'video-link'})['href']
-        print(video_url)
+        # Optionally wait for a few seconds to ensure all videos are loaded
+        time.sleep(10)  # Adjust this delay as needed
+        
+        # Locate all video items
+        videos = page.query_selector_all("div[data-e2e='user-post-item']")
+        video_data = []
+
+        # Extract video details
+        for video in videos:
+            try:
+                video_url = video.query_selector("a").get_attribute('href')
+                likes = video.query_selector("strong").inner_text()
+
+                video_data.append({
+                    'username': username,
+                    'video_url': video_url,
+                    'likes': int(likes.replace('K', '000').replace('M', '000000'))
+                })
+            except Exception as e:
+                print(f"Error scraping video: {e}")
+
+        browser.close()
+        print(video_data)
+        return video_data
